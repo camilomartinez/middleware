@@ -12,8 +12,10 @@ int main(int argc, char *argv[]) {
 	char buffer[100];
 	char* token;
 	unsigned int width, height, maxvalue;
-	
-	fp = fopen("feep.pgm", "r");
+	// Read command line parameters
+	char* input_filename = argv[1];
+
+	fp = fopen(input_filename, "r");
 	// Confirms first line is pgm format
 	fgets(buffer, sizeof(buffer), fp);
 	printf("%s",buffer);
