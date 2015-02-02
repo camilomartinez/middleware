@@ -5,11 +5,9 @@
 #include "gc.h"
 
 int main(int argc, char *argv[]) {
-	const char* SPACE = " ";	
 	FILE *fp;
 	char buffer[100];
-	char* token;
-	unsigned int width, height, maxvalue;
+	int width, height, maxvalue;
 	// Read command line parameters
 	char* input_filename = argv[1];
 	if (!input_filename) {
