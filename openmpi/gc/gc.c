@@ -3,9 +3,6 @@
 #include <math.h>
 #include <stdbool.h>
 #include "gc.h"
-// gamma correction parameters
-#define GAMMA 1.5
-#define A 1
 
 int main(int argc, char *argv[]) {
 	const char* SPACE = " ";	
@@ -23,26 +20,22 @@ int main(int argc, char *argv[]) {
 
 	fp = fopen(input_filename, "r");
 	// Confirms first line is pgm format
-	get_line(buffer, fp);
+	fgets(buffer, sizeof(buffer), fp);
 	verify_file_format(buffer);
 	// Skip comment
 	fgets(buffer, sizeof(buffer), fp);
-	printf("%s",buffer);
-	if(buffer[0] == '#'){
+	if(is_comment(buffer)){
 		// Skip second line if comment	
 		fgets(buffer, sizeof(buffer), fp);
 	}
 	// Get dimensions
-	token = (char*)strtok(buffer, SPACE);
-	width = atoi(token);
-	token = (char*)strtok(NULL, SPACE);
-	height = atoi(token);
+	get_dimensions(buffer, &width, &height);
 	// Get maxvalue
 	fgets(buffer, sizeof(buffer), fp);
-	maxvalue = atoi((char*)strtok(buffer, SPACE));
+	maxvalue = atoi(start_tokenize(buffer));
 	// New max value corrected with gamma	
 	maxvalue = gamma_encode(maxvalue, maxvalue);
-	printf("%d\n",maxvalue);
+	
 	// Reads line by line, encodes them and print
 	int *line;
 	while (fgets(buffer, sizeof(buffer), fp)) {
@@ -56,10 +49,6 @@ int main(int argc, char *argv[]) {
 	fclose(fp);
 }
 
-void get_line(char *buffer, FILE *fp) {
-	fgets(buffer, sizeof(buffer), fp);
-}
-
 bool verify_file_format(char *buffer) {
 	// Confirms it's pgm format
 	if(buffer[0] != 'P' || buffer[1] != '2'){
@@ -67,6 +56,19 @@ bool verify_file_format(char *buffer) {
 		fprintf(stderr, "Expected pgm file format\nAborting execution...\n");
 		exit(1);
 	}
+}
+
+bool is_comment(char *buffer) {
+	return (buffer[0] == '#');
+}
+
+void get_dimensions(char *buffer, int *width, int *height) {
+	char *token;
+	// Get dimensions
+	token = start_tokenize(buffer);
+	*width = atoi(token);
+	token = continue_tokenize();
+	*height = atoi(token);
 }
 
 void read_line(char *buffer, int *line, int width) {	
@@ -78,10 +80,20 @@ void read_line(char *buffer, int *line, int width) {
 		} else {
 			token_source = NULL;
 		}
-		token = (char*)strtok(token_source, " ");
+		token = (char*)strtok(token_source, SEPARATOR);
 		int value = atoi(token);
 		line[i] = value; 
 	}
+}
+
+char* start_tokenize(char *buffer) {
+	// Setup tokenizer reference
+	return (char*)strtok(buffer, SEPARATOR);
+}
+
+char* continue_tokenize() {
+	// Continue using previous reference
+	return (char*)strtok(NULL, SEPARATOR);
 }
 
 void encode_line(int *line, int width, int maxvalue) {

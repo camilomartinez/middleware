@@ -1,12 +1,22 @@
 #ifndef GC_H_   /* Include guard */
 #define GC_H_
 
-void get_line(char *buffer, FILE *fp);
-bool verify_file_format(char *buffer);
-void read_line(char *buffer, int *line, int width);
-void encode_line(int *line, int width, int maxvalue);
-void print_line(int *line, int width);
-int gamma_encode(int v_in, int maxvalue);
-int gamma_correction(int v_in, int maxvalue, double gamma);
+// gamma correction parameters
+#define GAMMA 1.5
+#define A 1
+// Separator
+#define SEPARATOR  " "
+
+void get_line(char*, FILE*);
+bool verify_file_format(char*);
+bool is_comment(char*);
+void get_dimensions(char*, int*, int*);
+void read_line(char*, int*, int);
+char* start_tokenize(char *);
+char* continue_tokenize();
+void encode_line(int*, int, int);
+void print_line(int*, int);
+int gamma_encode(int, int);
+int gamma_correction(int, int, double);
 
 #endif // GC_H_
