@@ -1,5 +1,7 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "gc.h"
 // gamma correction parameters
 #define GAMMA 1.5
 #define A 1
@@ -23,32 +25,63 @@ int main(int argc, char *argv[]) {
 	if(buffer[0] == '#'){
 		// Skip second line if comment	
 		fgets(buffer, sizeof(buffer), fp);
-		printf("%s",buffer);	
 	}
 	// Get dimensions
-	token = strtok(buffer, SPACE);
+	token = (char*)strtok(buffer, SPACE);
 	width = atoi(token);
-	token = strtok(NULL, SPACE);
+	token = (char*)strtok(NULL, SPACE);
 	height = atoi(token);
-	printf("width: %d, height: %d\n", width, height);	
 	// Get maxvalue
 	fgets(buffer, sizeof(buffer), fp);
-	maxvalue = atoi(strtok(buffer, SPACE));
+	maxvalue = atoi((char*)strtok(buffer, SPACE));
 	// New max value corrected with gamma	
 	maxvalue = gamma_encode(maxvalue, maxvalue);
-	printf("%d\n",maxvalue);		
+	printf("%d\n",maxvalue);
+	// Reads line by line, encodes them and print
+	int *line;
 	while (fgets(buffer, sizeof(buffer), fp)) {
-		//printf("%s",buffer);
-		token = strtok(buffer, SPACE);
-		while (token) {
-			int token_in = atoi(token);
-			int token_out = gamma_encode(token_in, maxvalue);
-    		printf("%d ", token_out);
-    		token = strtok(NULL, SPACE);
-		}
-		printf("\n");
+		// Allocate memory for line
+		line = (int*)malloc(width*sizeof(*line));
+		read_line(buffer, line, width);
+		encode_line(line, width, maxvalue);
+		print_line(line, width);
+		free(line);
 	}
 	fclose(fp);
+}
+
+void read_line(char *buffer, int *line, int width)
+{
+	int i;
+	char *token_source, *token;
+	for (i=0; i<width; i++) {		
+		if (i == 0) {
+			token_source = buffer;
+		} else {
+			token_source = NULL;
+		}
+		token = (char*)strtok(token_source, " ");
+		int value = atoi(token);
+		line[i] = value; 
+	}
+}
+
+void encode_line(int *line, int width, int maxvalue){
+	int i;
+	for (i=0; i<width; i++) {
+		int value_in = line[i];
+		int value_out = gamma_encode(value_in, maxvalue);
+		line[i] = value_out; 
+	}	
+}
+
+void print_line(int *line, int width) {
+	int i;
+	for (i=0; i<width; i++) {
+		int value = line[i];
+		printf("%d ", value);
+	}
+	printf("\n");
 }
 
 int gamma_encode(int v_in, int maxvalue) {
