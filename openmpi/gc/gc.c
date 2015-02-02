@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <stdbool.h>
 #include "gc.h"
 // gamma correction parameters
 #define GAMMA 1.5
@@ -14,14 +15,17 @@ int main(int argc, char *argv[]) {
 	unsigned int width, height, maxvalue;
 	// Read command line parameters
 	char* input_filename = argv[1];
+	if (!input_filename) {
+		// No command line input was given
+		fprintf(stderr, "Input file required!\nAborting execution...\n");	
+		exit(1);
+	}
 
 	fp = fopen(input_filename, "r");
 	// Confirms first line is pgm format
-	fgets(buffer, sizeof(buffer), fp);
-	printf("%s",buffer);
-	if(buffer[0] != 'P' || buffer[1] != '2'){
-		exit(1);
-	}
+	get_line(buffer, fp);
+	verify_file_format(buffer);
+	// Skip comment
 	fgets(buffer, sizeof(buffer), fp);
 	printf("%s",buffer);
 	if(buffer[0] == '#'){
@@ -52,8 +56,20 @@ int main(int argc, char *argv[]) {
 	fclose(fp);
 }
 
-void read_line(char *buffer, int *line, int width)
-{
+void get_line(char *buffer, FILE *fp) {
+	fgets(buffer, sizeof(buffer), fp);
+}
+
+bool verify_file_format(char *buffer) {
+	// Confirms it's pgm format
+	if(buffer[0] != 'P' || buffer[1] != '2'){
+		// Wrong file format
+		fprintf(stderr, "Expected pgm file format\nAborting execution...\n");
+		exit(1);
+	}
+}
+
+void read_line(char *buffer, int *line, int width) {	
 	int i;
 	char *token_source, *token;
 	for (i=0; i<width; i++) {		
@@ -68,7 +84,7 @@ void read_line(char *buffer, int *line, int width)
 	}
 }
 
-void encode_line(int *line, int width, int maxvalue){
+void encode_line(int *line, int width, int maxvalue) {
 	int i;
 	for (i=0; i<width; i++) {
 		int value_in = line[i];
