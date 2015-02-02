@@ -7,7 +7,7 @@
 // Separator
 #define SEPARATOR  " "
 
-void get_line(char*, FILE*);
+void read_header(FILE*, int*, int*, int*);
 bool verify_file_format(char*);
 bool is_comment(char*);
 void get_dimensions(char*, int*, int*);

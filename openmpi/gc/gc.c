@@ -19,20 +19,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	fp = fopen(input_filename, "r");
-	// Confirms first line is pgm format
-	fgets(buffer, sizeof(buffer), fp);
-	verify_file_format(buffer);
-	// Skip comment
-	fgets(buffer, sizeof(buffer), fp);
-	if(is_comment(buffer)){
-		// Skip second line if comment	
-		fgets(buffer, sizeof(buffer), fp);
-	}
-	// Get dimensions
-	get_dimensions(buffer, &width, &height);
-	// Get maxvalue
-	fgets(buffer, sizeof(buffer), fp);
-	maxvalue = atoi(start_tokenize(buffer));
+	// Initialize parameters
+	read_header(fp, &width, &height, &maxvalue);
 	// New max value corrected with gamma	
 	maxvalue = gamma_encode(maxvalue, maxvalue);
 	
@@ -47,6 +35,24 @@ int main(int argc, char *argv[]) {
 		free(line);
 	}
 	fclose(fp);
+}
+
+void read_header(FILE *fp, int *width, int *height, int *maxvalue) {
+	char buffer[100];
+	// Confirms first line is pgm format
+	fgets(buffer, sizeof(buffer), fp);
+	verify_file_format(buffer);
+	// Skip comment
+	fgets(buffer, sizeof(buffer), fp);
+	if(is_comment(buffer)){
+		// Skip second line if comment	
+		fgets(buffer, sizeof(buffer), fp);
+	}
+	// Get dimensions
+	get_dimensions(buffer, width, height);
+	// Get maxvalue
+	fgets(buffer, sizeof(buffer), fp);
+	*maxvalue = atoi(start_tokenize(buffer));
 }
 
 bool verify_file_format(char *buffer) {
