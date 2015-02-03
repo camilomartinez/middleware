@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdbool.h>
+#include "mpi.h"
 #include "gc.h"
 
 struct ImageParameters {
@@ -14,35 +15,41 @@ int main(int argc, char *argv[]) {
 	FILE *fp;
 	// pgm format parameters
 	struct ImageParameters params;
-	// Read command line parameters
-	char* input_filename = argv[1];
-	if (!input_filename) {
-		// No command line input was given
-		fprintf(stderr, "Input file required!\nAborting execution...\n");	
-		exit(1);
-	}
-	char* output_filename = argv[2];
-	if (!output_filename) {
-		// No command line input was given
-		printf("Using default output file: out.pgm\n");
-		output_filename = "out.pgm";
-	}
+	// MPI parameters
+	int numtasks, rank;
+	// Init MPI
+	MPI_Init(&argc, &argv);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
 
-	fp = fopen(input_filename, "r");
-	// Initialize parameters
-	read_header(fp, &params);
-	// New max value corrected with gamma
-	params.maxvalue = gamma_encode(params.maxvalue, params.maxvalue);
-	
-	// Reads line by line, encodes them and print
-	// Encoded as row, column
-	int **values = read_content(fp, &params);
-	encode_content(values, &params);
-	print_content(output_filename, &params, values);
-
-	// Cleanup
-	free_values(values, params.height);
-	fclose(fp);
+	if (rank==0) {
+		// Read command line parameters
+		char* input_filename = argv[1];
+		if (!input_filename) {
+			// No command line input was given
+			fprintf(stderr, "Input file required!\nAborting execution...\n");	
+			exit(1);
+		}
+		char* output_filename = argv[2];
+		if (!output_filename) {
+			// No command line input was given
+			printf("Using default output file: out.pgm\n");
+			output_filename = "out.pgm";
+		}
+		// Read file	
+		fp = fopen(input_filename, "r");
+		// Initialize parameters
+		read_header(fp, &params);
+		// Encoded as row, column
+		int **values = read_content(fp, &params);		
+		fclose(fp);		
+		encode_content(values, &params);
+		// Print new values to output file
+		print_content(output_filename, &params, values);
+		// Cleanup
+		free_values(values, params.height);
+	}
+	MPI_Finalize();
 }
 
 void read_header(FILE *fp, ImageParameters *params) {
@@ -60,7 +67,9 @@ void read_header(FILE *fp, ImageParameters *params) {
 	get_dimensions(buffer, params);
 	// Get maxvalue
 	fgets(buffer, sizeof(buffer), fp);
-	params->maxvalue = atoi(start_tokenize(buffer));
+	int maxvalue = atoi(start_tokenize(buffer));
+	// New max value corrected with gamma
+	params->maxvalue = gamma_encode(maxvalue, maxvalue);		
 }
 
 void verify_file_format(char *buffer) {
