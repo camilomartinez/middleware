@@ -17,8 +17,11 @@ int main(int argc, char *argv[]) {
 	// pgm format parameters
 	struct ImageParameters params;
 	// pgm content values
-	// Encoded as row, column
-	int **values;
+	// Encoded as a single array
+	// Ordered by row block of width elements
+	// element (i,j) is at position [i*width+j]
+	// with both i and j starting at zero
+	int *values;
 	// MPI parameters
 	int numtasks, rank;
 	// Init MPI
@@ -44,33 +47,62 @@ int main(int argc, char *argv[]) {
 		fp = fopen(input_filename, "r");
 		// Initialize parameters
 		read_header(fp, &params);
-		// Encoded as row, column
 		values = read_content(fp, &params);		
 		fclose(fp);		
 	}
 	// Broadcast parameters that are need by other processes
-	int data[2];
+	int data[3];
 	// Load them on the root
 	if (rank==0) {
 		data[0] = params.width;
-		data[1] = params.maxvalue;		
+		data[1] = params.height;
+		data[2] = params.maxvalue;		
 	}
-	MPI_Bcast(&data, 2, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&data, 3, MPI_INT, 0, MPI_COMM_WORLD);
 	// Set them on slaves
 	if (rank!=0) {
 		params.width = data[0];
-		params.maxvalue = data[1];
+		params.height = data[1];
+		params.maxvalue = data[2];
 	}
-	// Check all values were received
+	// Check received values
 	printf("Process %d. width: %d, maxvalue: %d\n", rank, params.width, params.maxvalue);
-	//MPI_Bcast(void* data, int count, MPI_Datatype datatype, int root, MPI_Comm communicator)
+	// Encode by scattering
+	int totalcount = params.width * params.height;
+	int sendcount = (totalcount) / numtasks;
+	printf("Process %d. sendcount: %d\n", rank, sendcount);
+	int* line = (int*)malloc(sendcount*sizeof(int));	
+	// Send chunk to each process
+	if (rank==0) {
+		printf("Process %d scattered:\n", rank);
+		print_line(values, totalcount);
+	}
+	MPI_Scatter(values, sendcount, MPI_INT,
+		line, sendcount, MPI_INT,
+		0, MPI_COMM_WORLD);
+	// Encode lines received
+	printf("Process %d. received:\n", rank);
+	print_line(line, sendcount);
+	encode_line(line, &params);
+	printf("Process %d. encoded:\n", rank);
+	print_line(line, sendcount);
+	// Get all the chunks back
+	MPI_Gather(line, sendcount, MPI_INT,
+		values, sendcount, MPI_INT,
+        0, MPI_COMM_WORLD);
+	if (rank==0) {
+		printf("Process %d gathered:\n", rank);
+		print_line(values, totalcount);
+	}
+	free(line);
+	// Single machine encode
+	//encode_content(values, &params);		
 	// Print done only by the root
 	if (rank==0) {			
-		encode_content(values, &params);
 		// Print new values to output file
 		print_content(output_filename, &params, values);
 		// Cleanup
-		free_values(values, params.height);
+		free(values);
 	}
 	MPI_Finalize();
 }
@@ -117,30 +149,32 @@ void get_dimensions(char *buffer, ImageParameters *params) {
 	params->height = atoi(token);
 }
 
-int** read_content(FILE *fp, ImageParameters *params) {
+int* read_content(FILE *fp, ImageParameters *params) {
 	char buffer[100];
-	// Values encoded as row, column
-	int i, **values;
+	// Values encoded as a single array
+	// Ordered by row block of width elements
+	// element (i,j) is at position [i*width+j]
+	// with both i and j starting at zero
+	int i, *values;
 	int height = params->height;
 	int width = params->width;
-	// Allocate all arrays
-	values = (int**)malloc(height*sizeof(int*));
+	// Allocate  array for all values
+	values = (int*)malloc(width*height*sizeof(int));
 	// Read all the content
 	for (i = 0; i < height; ++i) {
 		if (!fgets(buffer, sizeof(buffer), fp)) {
 			fprintf(stderr, "Height greater than number of content lines\nAborting execution...\n");	
 			exit(1);
 		}
-		values[i] = read_line(buffer, width);		
+		read_line(buffer, width, values, i);
 	}
 	return values;
 }
 
-int* read_line(char *buffer, int width) {	
-	int i, *line;
+void read_line(char *buffer, int width, int *values, int line_number) {	
+	int i;
 	char *token;
-	// Allocate space
-	line = (int*)malloc(width*sizeof(*line));
+	// Read and set the whole line
 	for (i=0; i<width; i++) {		
 		if (i == 0) {
 			token = start_tokenize(buffer);
@@ -148,9 +182,8 @@ int* read_line(char *buffer, int width) {
 			token = continue_tokenize();
 		}
 		int value = atoi(token);
-		line[i] = value; 
+		set_value(values, width, line_number, i, value);
 	}
-	return line;
 }
 
 char* start_tokenize(char *buffer) {
@@ -161,6 +194,16 @@ char* start_tokenize(char *buffer) {
 char* continue_tokenize() {
 	// Continue using previous reference
 	return (char*)strtok(NULL, SEPARATOR);
+}
+
+void set_value(int *values, int width, int i, int j, int value) {
+	int position = i*width + j;
+	values[position] = value;
+}
+
+int get_value(int* values, int width, int i, int j) {
+	int position = i*width + j;
+	return values[position];
 }
 
 void encode_content(int** values, ImageParameters *params) {
@@ -198,7 +241,7 @@ int gamma_correction(int v_in, int maxvalue, double gamma) {
 	return result;
 }
 
-void print_content(char* filename, ImageParameters *params, int **values)
+void print_content(char* filename, ImageParameters *params, int *values)
 {
 	int i;
 	FILE* fp = fopen(filename, "w+");
@@ -211,27 +254,25 @@ void print_content(char* filename, ImageParameters *params, int **values)
 	fprintf(fp, "%d\n", params->maxvalue);
 	// content
 	for (i = 0; i < params->height; ++i) {
-		int* line = values[i];
-		print_line(fp, line, params->width);
+		fprint_line(fp, values, params->width, i);
 	}
 	fclose(fp);
 }
 
-void print_line(FILE *fp, int *line, int width) {
+void fprint_line(FILE *fp, int *values, int width, int line_number) {
 	int i;
 	for (i=0; i<width; i++) {
-		int value = line[i];
+		int value = get_value(values, width, line_number, i);
 		fprintf(fp, "%d ", value);
 	}
 	fprintf(fp, "\n");
 }
 
-void free_values(int **values, int height) {
+void print_line(int *line, int width) {
 	int i;
-	// Free all the rows
-	for (i = 0; i < height; ++i) {
-		free(values[i]);
+	for (i=0; i<width; i++) {
+		int value = line[i];
+		printf("%d ", value);
 	}
-	// Free the array of pointers
-	free(values);
+	printf("\n");
 }
