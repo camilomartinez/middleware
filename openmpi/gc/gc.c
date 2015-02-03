@@ -4,10 +4,17 @@
 #include <stdbool.h>
 #include "gc.h"
 
+struct ImageParameters {
+	int width;
+	int height;
+	int maxvalue;
+};
+
 int main(int argc, char *argv[]) {
 	FILE *fp;
 	char buffer[100];
-	// pgm format paramters
+	// pgm format parameters
+	struct ImageParameters params;
 	int width, height, maxvalue;
 	// Read command line parameters
 	char* input_filename = argv[1];
@@ -19,7 +26,10 @@ int main(int argc, char *argv[]) {
 
 	fp = fopen(input_filename, "r");
 	// Initialize parameters
-	read_header(fp, &width, &height, &maxvalue);
+	read_header(fp, &params);
+	width = params.width;
+	height = params.height;
+	maxvalue = params.maxvalue;
 	// New max value corrected with gamma	
 	maxvalue = gamma_encode(maxvalue, maxvalue);
 	
@@ -38,8 +48,7 @@ int main(int argc, char *argv[]) {
 		values[i] = read_line(buffer, width);		
 	}
 
-	// Encodes the content
-	
+	// Encodes the content	
 	for (i = 0; i < height; ++i) {
 		int* line = values[i];
 		encode_line(line, width, maxvalue);
@@ -60,7 +69,7 @@ int main(int argc, char *argv[]) {
 	fclose(fp);
 }
 
-void read_header(FILE *fp, int *width, int *height, int *maxvalue) {
+void read_header(FILE *fp, ImageParameters *params) {
 	char buffer[100];
 	// Confirms first line is pgm format
 	fgets(buffer, sizeof(buffer), fp);
@@ -72,10 +81,10 @@ void read_header(FILE *fp, int *width, int *height, int *maxvalue) {
 		fgets(buffer, sizeof(buffer), fp);
 	}
 	// Get dimensions
-	get_dimensions(buffer, width, height);
+	get_dimensions(buffer, params);
 	// Get maxvalue
 	fgets(buffer, sizeof(buffer), fp);
-	*maxvalue = atoi(start_tokenize(buffer));
+	params->maxvalue = atoi(start_tokenize(buffer));
 }
 
 void verify_file_format(char *buffer) {
@@ -91,27 +100,26 @@ bool is_comment(char *buffer) {
 	return (buffer[0] == '#');
 }
 
-void get_dimensions(char *buffer, int *width, int *height) {
+void get_dimensions(char *buffer, ImageParameters *params) {
 	char *token;
 	// Get dimensions
 	token = start_tokenize(buffer);
-	*width = atoi(token);
+	params->width = atoi(token);
 	token = continue_tokenize();
-	*height = atoi(token);
+	params->height = atoi(token);
 }
 
 int* read_line(char *buffer, int width) {	
 	int i, *line;
-	char *token_source, *token;
+	char *token;
 	// Allocate space
 	line = (int*)malloc(width*sizeof(*line));
 	for (i=0; i<width; i++) {		
 		if (i == 0) {
-			token_source = buffer;
+			token = start_tokenize(buffer);
 		} else {
-			token_source = NULL;
+			token = continue_tokenize();
 		}
-		token = (char*)strtok(token_source, SEPARATOR);
 		int value = atoi(token);
 		line[i] = value; 
 	}

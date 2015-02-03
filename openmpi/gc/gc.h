@@ -6,11 +6,13 @@
 #define A 1
 // Separator
 #define SEPARATOR  " "
+// Custom data types
+typedef struct ImageParameters ImageParameters;
 
-void read_header(FILE*, int*, int*, int*);
+void read_header(FILE*, ImageParameters*);
 void verify_file_format(char*);
 bool is_comment(char*);
-void get_dimensions(char*, int*, int*);
+void get_dimensions(char*, ImageParameters*);
 int* read_line(char*, int);
 char* start_tokenize(char *);
 char* continue_tokenize();
