@@ -12,10 +12,8 @@ struct ImageParameters {
 
 int main(int argc, char *argv[]) {
 	FILE *fp;
-	char buffer[100];
 	// pgm format parameters
 	struct ImageParameters params;
-	int width, height, maxvalue;
 	// Read command line parameters
 	char* input_filename = argv[1];
 	if (!input_filename) {
@@ -23,49 +21,27 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "Input file required!\nAborting execution...\n");	
 		exit(1);
 	}
+	char* output_filename = argv[2];
+	if (!output_filename) {
+		// No command line input was given
+		printf("Using default output file: out.pgm\n");
+		output_filename = "out.pgm";
+	}
 
 	fp = fopen(input_filename, "r");
 	// Initialize parameters
 	read_header(fp, &params);
-	width = params.width;
-	height = params.height;
-	maxvalue = params.maxvalue;
-	// New max value corrected with gamma	
-	maxvalue = gamma_encode(maxvalue, maxvalue);
+	// New max value corrected with gamma
+	params.maxvalue = gamma_encode(params.maxvalue, params.maxvalue);
 	
 	// Reads line by line, encodes them and print
-	int i;
 	// Encoded as row, column
-	int **values;
-	// Allocate all arrays
-	values = (int**)malloc(height*sizeof(int*));
-	// Read all the content
-	for (i = 0; i < height; ++i) {
-		if (!fgets(buffer, sizeof(buffer), fp)) {
-			fprintf(stderr, "Height greater than number of content lines\nAborting execution...\n");	
-			exit(1);
-		}
-		values[i] = read_line(buffer, width);		
-	}
+	int **values = read_content(fp, &params);
+	encode_content(values, &params);
+	print_content(output_filename, &params, values);
 
-	// Encodes the content	
-	for (i = 0; i < height; ++i) {
-		int* line = values[i];
-		encode_line(line, width, maxvalue);
-	}
-
-	// Prints the content
-	for (i = 0; i < height; ++i) {
-		int* line = values[i];
-		print_line(line, width);
-	}	
-
-	// Free all the values
-	for (i = 0; i < height; ++i) {
-		free(values[i]);
-	}
-	free(values);
-	// Make sure to close the file
+	// Cleanup
+	free_values(values, params.height);
 	fclose(fp);
 }
 
@@ -109,6 +85,25 @@ void get_dimensions(char *buffer, ImageParameters *params) {
 	params->height = atoi(token);
 }
 
+int** read_content(FILE *fp, ImageParameters *params) {
+	char buffer[100];
+	// Values encoded as row, column
+	int i, **values;
+	int height = params->height;
+	int width = params->width;
+	// Allocate all arrays
+	values = (int**)malloc(height*sizeof(int*));
+	// Read all the content
+	for (i = 0; i < height; ++i) {
+		if (!fgets(buffer, sizeof(buffer), fp)) {
+			fprintf(stderr, "Height greater than number of content lines\nAborting execution...\n");	
+			exit(1);
+		}
+		values[i] = read_line(buffer, width);		
+	}
+	return values;
+}
+
 int* read_line(char *buffer, int width) {	
 	int i, *line;
 	char *token;
@@ -136,11 +131,19 @@ char* continue_tokenize() {
 	return (char*)strtok(NULL, SEPARATOR);
 }
 
-void encode_line(int *line, int width, int maxvalue) {
+void encode_content(int** values, ImageParameters *params) {
 	int i;
-	for (i=0; i<width; i++) {
+	for (i = 0; i < params->height; ++i) {
+		int* line = values[i];
+		encode_line(line, params);
+	}
+}
+
+void encode_line(int *line, ImageParameters *params) {
+	int i;
+	for (i=0; i<params->width; i++) {
 		int value_in = line[i];
-		int value_out = gamma_encode(value_in, maxvalue);
+		int value_out = gamma_encode(value_in, params->maxvalue);
 		line[i] = value_out; 
 	}	
 }
@@ -163,11 +166,40 @@ int gamma_correction(int v_in, int maxvalue, double gamma) {
 	return result;
 }
 
-void print_line(int *line, int width) {
+void print_content(char* filename, ImageParameters *params, int **values)
+{
+	int i;
+	FILE* fp = fopen(filename, "w+");
+	// Print header
+	// Format
+	fprintf(fp, "P2\n");
+	// width height
+	fprintf(fp, "%d %d\n", params->width, params->height);
+	// maxvalue
+	fprintf(fp, "%d\n", params->maxvalue);
+	// content
+	for (i = 0; i < params->height; ++i) {
+		int* line = values[i];
+		print_line(fp, line, params->width);
+	}
+	fclose(fp);
+}
+
+void print_line(FILE *fp, int *line, int width) {
 	int i;
 	for (i=0; i<width; i++) {
 		int value = line[i];
-		printf("%d ", value);
+		fprintf(fp, "%d ", value);
 	}
-	printf("\n");
+	fprintf(fp, "\n");
+}
+
+void free_values(int **values, int height) {
+	int i;
+	// Free all the rows
+	for (i = 0; i < height; ++i) {
+		free(values[i]);
+	}
+	// Free the array of pointers
+	free(values);
 }
