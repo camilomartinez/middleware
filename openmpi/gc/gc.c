@@ -13,15 +13,19 @@ struct ImageParameters {
 
 int main(int argc, char *argv[]) {
 	FILE *fp;
+	char* output_filename;
 	// pgm format parameters
 	struct ImageParameters params;
+	// pgm content values
+	// Encoded as row, column
+	int **values;
 	// MPI parameters
 	int numtasks, rank;
 	// Init MPI
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
-
+	// Reading the file only done by the root
 	if (rank==0) {
 		// Read command line parameters
 		char* input_filename = argv[1];
@@ -30,7 +34,7 @@ int main(int argc, char *argv[]) {
 			fprintf(stderr, "Input file required!\nAborting execution...\n");	
 			exit(1);
 		}
-		char* output_filename = argv[2];
+		output_filename = argv[2];
 		if (!output_filename) {
 			// No command line input was given
 			printf("Using default output file: out.pgm\n");
@@ -41,8 +45,27 @@ int main(int argc, char *argv[]) {
 		// Initialize parameters
 		read_header(fp, &params);
 		// Encoded as row, column
-		int **values = read_content(fp, &params);		
+		values = read_content(fp, &params);		
 		fclose(fp);		
+	}
+	// Broadcast parameters that are need by other processes
+	int data[2];
+	// Load them on the root
+	if (rank==0) {
+		data[0] = params.width;
+		data[1] = params.maxvalue;		
+	}
+	MPI_Bcast(&data, 2, MPI_INT, 0, MPI_COMM_WORLD);
+	// Set them on slaves
+	if (rank!=0) {
+		params.width = data[0];
+		params.maxvalue = data[1];
+	}
+	// Check all values were received
+	printf("Process %d. width: %d, maxvalue: %d\n", rank, params.width, params.maxvalue);
+	//MPI_Bcast(void* data, int count, MPI_Datatype datatype, int root, MPI_Comm communicator)
+	// Print done only by the root
+	if (rank==0) {			
 		encode_content(values, &params);
 		// Print new values to output file
 		print_content(output_filename, &params, values);
