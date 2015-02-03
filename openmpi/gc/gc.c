@@ -7,6 +7,7 @@
 int main(int argc, char *argv[]) {
 	FILE *fp;
 	char buffer[100];
+	// pgm format paramters
 	int width, height, maxvalue;
 	// Read command line parameters
 	char* input_filename = argv[1];
@@ -23,15 +24,39 @@ int main(int argc, char *argv[]) {
 	maxvalue = gamma_encode(maxvalue, maxvalue);
 	
 	// Reads line by line, encodes them and print
-	int *line;
-	while (fgets(buffer, sizeof(buffer), fp)) {
-		// Allocate memory for line
-		line = (int*)malloc(width*sizeof(*line));
-		read_line(buffer, line, width);
-		encode_line(line, width, maxvalue);
-		print_line(line, width);
-		free(line);
+	int i;
+	// Encoded as row, column
+	int **values;
+	// Allocate all arrays
+	values = (int**)malloc(height*sizeof(int*));
+	// Read all the content
+	for (i = 0; i < height; ++i) {
+		if (!fgets(buffer, sizeof(buffer), fp)) {
+			fprintf(stderr, "Height greater than number of content lines\nAborting execution...\n");	
+			exit(1);
+		}
+		values[i] = read_line(buffer, width);		
 	}
+
+	// Encodes the content
+	
+	for (i = 0; i < height; ++i) {
+		int* line = values[i];
+		encode_line(line, width, maxvalue);
+	}
+
+	// Prints the content
+	for (i = 0; i < height; ++i) {
+		int* line = values[i];
+		print_line(line, width);
+	}	
+
+	// Free all the values
+	for (i = 0; i < height; ++i) {
+		free(values[i]);
+	}
+	free(values);
+	// Make sure to close the file
 	fclose(fp);
 }
 
@@ -53,7 +78,7 @@ void read_header(FILE *fp, int *width, int *height, int *maxvalue) {
 	*maxvalue = atoi(start_tokenize(buffer));
 }
 
-bool verify_file_format(char *buffer) {
+void verify_file_format(char *buffer) {
 	// Confirms it's pgm format
 	if(buffer[0] != 'P' || buffer[1] != '2'){
 		// Wrong file format
@@ -75,9 +100,11 @@ void get_dimensions(char *buffer, int *width, int *height) {
 	*height = atoi(token);
 }
 
-void read_line(char *buffer, int *line, int width) {	
-	int i;
+int* read_line(char *buffer, int width) {	
+	int i, *line;
 	char *token_source, *token;
+	// Allocate space
+	line = (int*)malloc(width*sizeof(*line));
 	for (i=0; i<width; i++) {		
 		if (i == 0) {
 			token_source = buffer;
@@ -88,6 +115,7 @@ void read_line(char *buffer, int *line, int width) {
 		int value = atoi(token);
 		line[i] = value; 
 	}
+	return line;
 }
 
 char* start_tokenize(char *buffer) {
@@ -109,15 +137,6 @@ void encode_line(int *line, int width, int maxvalue) {
 	}	
 }
 
-void print_line(int *line, int width) {
-	int i;
-	for (i=0; i<width; i++) {
-		int value = line[i];
-		printf("%d ", value);
-	}
-	printf("\n");
-}
-
 int gamma_encode(int v_in, int maxvalue) {
 	return gamma_correction(v_in, maxvalue, ((double)1/GAMMA));
 }
@@ -134,4 +153,13 @@ int gamma_correction(int v_in, int maxvalue, double gamma) {
 		result = 0;
 	}
 	return result;
+}
+
+void print_line(int *line, int width) {
+	int i;
+	for (i=0; i<width; i++) {
+		int value = line[i];
+		printf("%d ", value);
+	}
+	printf("\n");
 }

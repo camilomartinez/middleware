@@ -8,10 +8,10 @@
 #define SEPARATOR  " "
 
 void read_header(FILE*, int*, int*, int*);
-bool verify_file_format(char*);
+void verify_file_format(char*);
 bool is_comment(char*);
 void get_dimensions(char*, int*, int*);
-void read_line(char*, int*, int);
+int* read_line(char*, int);
 char* start_tokenize(char *);
 char* continue_tokenize();
 void encode_line(int*, int, int);
