@@ -88,14 +88,21 @@ int main(int argc, char *argv[]) {
 	MPI_Gather(line, sendcount, MPI_INT,
 		values, sendcount, MPI_INT,
         0, MPI_COMM_WORLD);
+	// Free dynamically allocated buffer
+	free(line);	
 	if (rank==0) {
 		print_process_line_debug(rank, "gathered", values, totalcount);
+		int scatteredcount = sendcount * numtasks;
+		int missingcount = totalcount - scatteredcount;
+		if (missingcount > 0) {
+			line = &(values[scatteredcount]);
+			encode_line(line, missingcount, params.maxvalue);
+		}
 	}
-	free(line);
 	// Single machine encode
 	//encode_content(values, &params);		
 	// Print done only by the root
-	if (rank==0) {			
+	if (rank==0) {
 		// Print new values to output file
 		print_content(output_filename, &params, values);
 		// Cleanup
