@@ -70,29 +70,26 @@ int main(int argc, char *argv[]) {
 	// Encode by scattering
 	int totalcount = params.width * params.height;
 	int sendcount = (totalcount) / numtasks;
-	printf("Process %d. sendcount: %d\n", rank, sendcount);
-	int* line = (int*)malloc(sendcount*sizeof(int));	
+	printf("Process %d. totalcount: %d sendcount: %d\n", rank, totalcount, sendcount);
+	// Allocated dynamically per process
+	int* line = (int*)malloc(sendcount*sizeof(int));
 	// Send chunk to each process
 	if (rank==0) {
-		printf("Process %d scattered:\n", rank);
-		print_line(values, totalcount);
+		print_process_line_debug(rank, "scattered", values, totalcount);
 	}
 	MPI_Scatter(values, sendcount, MPI_INT,
 		line, sendcount, MPI_INT,
 		0, MPI_COMM_WORLD);
 	// Encode lines received
-	printf("Process %d. received:\n", rank);
-	print_line(line, sendcount);
+	print_process_line_debug(rank, "received", line, sendcount);
 	encode_line(line, sendcount, params.maxvalue);
-	printf("Process %d. encoded:\n", rank);
-	print_line(line, sendcount);
+	print_process_line_debug(rank, "encoded", line, sendcount);
 	// Get all the chunks back
 	MPI_Gather(line, sendcount, MPI_INT,
 		values, sendcount, MPI_INT,
         0, MPI_COMM_WORLD);
 	if (rank==0) {
-		printf("Process %d gathered:\n", rank);
-		print_line(values, totalcount);
+		print_process_line_debug(rank, "gathered", values, totalcount);
 	}
 	free(line);
 	// Single machine encode
@@ -260,11 +257,18 @@ void fprint_line(FILE *fp, int *values, int width, int line_number) {
 	fprintf(fp, "\n");
 }
 
-void print_line(int *line, int width) {
+void print_process_line_debug(int rank, char *event, int *line, int size) {
 	int i;
-	for (i=0; i<width; i++) {
+	printf("Process %d %s:\n", rank, event);
+	for (i=0; i<size; i++) {
 		int value = line[i];
-		printf("%d ", value);
+		if (i != (size - 1)) {
+			printf("%d ", value);		
+		} else {
+			// Avoid space at the end of the line
+			printf("%d", value);
+		}
 	}
+	// End of line
 	printf("\n");
 }
