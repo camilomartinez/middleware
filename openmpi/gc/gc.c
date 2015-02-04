@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 	// Encode lines received
 	printf("Process %d. received:\n", rank);
 	print_line(line, sendcount);
-	encode_line(line, &params);
+	encode_line(line, sendcount, params.maxvalue);
 	printf("Process %d. encoded:\n", rank);
 	print_line(line, sendcount);
 	// Get all the chunks back
@@ -206,19 +206,11 @@ int get_value(int* values, int width, int i, int j) {
 	return values[position];
 }
 
-void encode_content(int** values, ImageParameters *params) {
+void encode_line(int *line, int size, int maxvalue) {
 	int i;
-	for (i = 0; i < params->height; ++i) {
-		int* line = values[i];
-		encode_line(line, params);
-	}
-}
-
-void encode_line(int *line, ImageParameters *params) {
-	int i;
-	for (i=0; i<params->width; i++) {
+	for (i=0; i<size; i++) {
 		int value_in = line[i];
-		int value_out = gamma_encode(value_in, params->maxvalue);
+		int value_out = gamma_encode(value_in, maxvalue);
 		line[i] = value_out; 
 	}	
 }
