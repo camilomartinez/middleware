@@ -60,7 +60,9 @@ int main(int argc, char *argv[]) {
 		data[1] = params.height;
 		data[2] = params.maxvalue;		
 	}
+	printf("Processor %s, rank %d. Before broadcast\n", processor_name, rank);
 	MPI_Bcast(&data, 3, MPI_INT, 0, MPI_COMM_WORLD);
+	printf("Processor %s, rank %d. After broadcast\n", processor_name, rank);
 	// Set them on slaves
 	if (rank!=0) {
 		params.width = data[0];
