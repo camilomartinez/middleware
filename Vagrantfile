@@ -17,7 +17,8 @@ Vagrant.configure(2) do |config|
         vb.name = node_name
       end
       # Networking
-      node.vm.network :private_network, ip: "192.168.33.#{10+i}"
+      #node.vm.network :private_network, ip: "192.168.33.#{10+i}"
+      node.vm.network :public_network, ip: "192.168.1.#{100+i}"
       node.vm.hostname = node_name
     end    
   end
