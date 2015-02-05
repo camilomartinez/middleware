@@ -1,3 +1,4 @@
+http://www.thecloudavenue.com/2012/01/how-to-setup-password-less-ssh-to.html
 1) Generate the ssh key
 ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa
 2) Copy the key to all the slaves (replace username appropriately as the user starting the Hadoop daemons). Will be prompted for the password.
