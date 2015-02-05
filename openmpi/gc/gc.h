@@ -23,6 +23,6 @@ int gamma_encode(int, int);
 int gamma_correction(int, int, double);
 void print_content(char*, ImageParameters*, int*);
 void fprint_line(FILE*, int*, int, int);
-void print_process_line_debug(int, char*, int*, int);
+void print_process_line_debug(char*, int, char*, int*, int);
 
 #endif // GC_H_

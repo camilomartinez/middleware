@@ -23,11 +23,13 @@ int main(int argc, char *argv[]) {
 	// with both i and j starting at zero
 	int *values;
 	// MPI parameters
-	int numtasks, rank;
+	int numtasks, rank, name_len;
+	char processor_name[MPI_MAX_PROCESSOR_NAME];
 	// Init MPI
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+	MPI_Get_processor_name(processor_name, &name_len);
 	// Reading the file only done by the root
 	if (rank==0) {
 		// Read command line parameters
@@ -66,24 +68,24 @@ int main(int argc, char *argv[]) {
 		params.maxvalue = data[2];
 	}
 	// Check received values
-	printf("Process %d. width: %d, maxvalue: %d\n", rank, params.width, params.maxvalue);
+	printf("Processor %s, rank %d. width: %d, maxvalue: %d\n", processor_name, rank, params.width, params.maxvalue);
 	// Encode by scattering
 	int totalcount = params.width * params.height;
 	int sendcount = (totalcount) / numtasks;
-	printf("Process %d. totalcount: %d sendcount: %d\n", rank, totalcount, sendcount);
+	printf("Process %s, rank %d. totalcount: %d sendcount: %d\n", processor_name, rank, totalcount, sendcount);
 	// Allocated dynamically per process
 	int* line = (int*)malloc(sendcount*sizeof(int));
 	// Send chunk to each process
 	if (rank==0) {
-		print_process_line_debug(rank, "scattered", values, totalcount);
+		print_process_line_debug(processor_name, rank, "scattered", values, totalcount);
 	}
 	MPI_Scatter(values, sendcount, MPI_INT,
 		line, sendcount, MPI_INT,
 		0, MPI_COMM_WORLD);
 	// Encode lines received
-	print_process_line_debug(rank, "received", line, sendcount);
+	print_process_line_debug(processor_name, rank, "received", line, sendcount);
 	encode_line(line, sendcount, params.maxvalue);
-	print_process_line_debug(rank, "encoded", line, sendcount);
+	print_process_line_debug(processor_name, rank, "encoded", line, sendcount);
 	// Get all the chunks back
 	MPI_Gather(line, sendcount, MPI_INT,
 		values, sendcount, MPI_INT,
@@ -91,7 +93,7 @@ int main(int argc, char *argv[]) {
 	// Free dynamically allocated buffer
 	free(line);	
 	if (rank==0) {
-		print_process_line_debug(rank, "gathered", values, totalcount);
+		print_process_line_debug(processor_name, rank, "gathered", values, totalcount);
 		int scatteredcount = sendcount * numtasks;
 		int missingcount = totalcount - scatteredcount;
 		if (missingcount > 0) {
@@ -264,9 +266,9 @@ void fprint_line(FILE *fp, int *values, int width, int line_number) {
 	fprintf(fp, "\n");
 }
 
-void print_process_line_debug(int rank, char *event, int *line, int size) {
+void print_process_line_debug(char* name, int rank, char *event, int *line, int size) {
 	int i;
-	printf("Process %d %s:\n", rank, event);
+	printf("Processor %s, rank %d %s:\n", name, rank, event);
 	for (i=0; i<size; i++) {
 		int value = line[i];
 		if (i != (size - 1)) {
