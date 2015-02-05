@@ -1,0 +1,4 @@
+3) Generate the ssh key
+ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa
+4) Copy the key to all the slaves (replace username appropriately as the user starting the Hadoop daemons). Will be prompted for the password.
+ssh-copy-id -i $HOME/.ssh/id_rsa.pub username@slave-hostname
