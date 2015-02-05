@@ -1,4 +1,6 @@
-3) Generate the ssh key
+1) Generate the ssh key
 ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa
-4) Copy the key to all the slaves (replace username appropriately as the user starting the Hadoop daemons). Will be prompted for the password.
+2) Copy the key to all the slaves (replace username appropriately as the user starting the Hadoop daemons). Will be prompted for the password.
 ssh-copy-id -i $HOME/.ssh/id_rsa.pub username@slave-hostname
+3) Remember to update ip-address on both the vagrant file and /etc/hosts
+4) Update the hosts list in the bash script
