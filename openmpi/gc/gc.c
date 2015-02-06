@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 			output_filename = "out.pgm";
 		}
 		// Read all the content of the file
-		read_pgm_file(input_filename, &params, values);	
+		values = read_pgm_file(input_filename, &params);	
 	}
 	// Broadcast parameters that are need by other processes
 	int data[3];
@@ -109,7 +109,8 @@ int main(int argc, char *argv[]) {
 	MPI_Finalize();
 }
 
-void read_pgm_file(char *filename, ImageParameters *params, int *values) {
+int* read_pgm_file(char *filename, ImageParameters *params) {
+	int* values;
 	FILE *fp;
 	char ch;	
 	fp = fopen(filename, "r");
@@ -121,6 +122,7 @@ void read_pgm_file(char *filename, ImageParameters *params, int *values) {
 	read_header(fp, params);
 	values = read_content(fp, params);
 	fclose(fp);
+	return values;
 }
 
 void read_header(FILE *fp, ImageParameters *params) {
@@ -159,6 +161,8 @@ void skip_comment(FILE *fp) {
 }
 
 void get_dimensions(FILE *fp, ImageParameters *params) {
+	// Avoid issue with width not being read correctly
+	fseek(fp, -1, SEEK_CUR);
 	fscanf(fp,"%d", &((*params).width));
 	fscanf(fp,"%d", &((*params).height));
 	fscanf(fp,"%d", &((*params).maxvalue));
@@ -176,7 +180,7 @@ int* read_content(FILE *fp, ImageParameters *params) {
 	values = (int*)malloc(width*height*sizeof(int));
 	// Read all the content
 	for (i = 0; i < height; ++i) {
-		for (j = 0; i < width; ++j) {
+		for (j = 0; j < width; ++j) {
 			fscanf(fp,"%d", &value);
 			set_value(values, width, i, j, value);
 		}

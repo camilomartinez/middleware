@@ -9,7 +9,7 @@
 // Custom data types
 typedef struct ImageParameters ImageParameters;
 
-void read_pgm_file(char*, ImageParameters*, int *);
+int* read_pgm_file(char*, ImageParameters*);
 void read_header(FILE*, ImageParameters*);
 void verify_file_format(FILE*);
 void skip_comment(FILE*);
