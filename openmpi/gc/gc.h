@@ -9,14 +9,12 @@
 // Custom data types
 typedef struct ImageParameters ImageParameters;
 
+void read_pgm_file(char*, ImageParameters*, int *);
 void read_header(FILE*, ImageParameters*);
-void verify_file_format(char*);
-bool is_comment(char*);
-void get_dimensions(char*, ImageParameters*);
+void verify_file_format(FILE*);
+void skip_comment(FILE*);
+void get_dimensions(FILE*, ImageParameters*);
 int* read_content(FILE*, ImageParameters*);
-void read_line(char *, int, int*, int);
-char* start_tokenize(char *);
-char* continue_tokenize();
 void set_value(int*, int, int, int, int);
 void encode_line(int*, int, int);
 int gamma_encode(int, int);

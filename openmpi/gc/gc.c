@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <stdbool.h>
 #include "mpi.h"
 #include "gc.h"
 
@@ -12,7 +11,6 @@ struct ImageParameters {
 };
 
 int main(int argc, char *argv[]) {
-	FILE *fp;
 	char* output_filename;
 	// pgm format parameters
 	struct ImageParameters params;
@@ -36,7 +34,7 @@ int main(int argc, char *argv[]) {
 		char* input_filename = argv[1];
 		if (!input_filename) {
 			// No command line input was given
-			fprintf(stderr, "Input file required!\nAborting execution...\n");	
+			fprintf(stderr, "Error: Input file required!\nAborting execution...\n");	
 			exit(1);
 		}
 		output_filename = argv[2];
@@ -45,12 +43,8 @@ int main(int argc, char *argv[]) {
 			printf("Using default output file: out.pgm\n");
 			output_filename = "out.pgm";
 		}
-		// Read file	
-		fp = fopen(input_filename, "r");
-		// Initialize parameters
-		read_header(fp, &params);
-		values = read_content(fp, &params);		
-		fclose(fp);		
+		// Read all the content of the file
+		read_pgm_file(input_filename, &params, values);	
 	}
 	// Broadcast parameters that are need by other processes
 	int data[3];
@@ -115,93 +109,79 @@ int main(int argc, char *argv[]) {
 	MPI_Finalize();
 }
 
-void read_header(FILE *fp, ImageParameters *params) {
-	char buffer[100];
-	// Confirms first line is pgm format
-	fgets(buffer, sizeof(buffer), fp);
-	verify_file_format(buffer);
-	// Skip comment
-	fgets(buffer, sizeof(buffer), fp);
-	if(is_comment(buffer)){
-		// Skip second line if comment	
-		fgets(buffer, sizeof(buffer), fp);
+void read_pgm_file(char *filename, ImageParameters *params, int *values) {
+	FILE *fp;
+	char ch;	
+	fp = fopen(filename, "r");
+	// Check if file was opened
+	if (fp == NULL) {
+		fprintf(stderr, "Error: Unable to open file %s\nAborting execution...\n", filename);
+		exit(8);
 	}
-	// Get dimensions
-	get_dimensions(buffer, params);
-	// Get maxvalue
-	fgets(buffer, sizeof(buffer), fp);
-	int maxvalue = atoi(start_tokenize(buffer));
+	read_header(fp, params);
+	values = read_content(fp, params);
+	fclose(fp);
+}
+
+void read_header(FILE *fp, ImageParameters *params) {
+	verify_file_format(fp);
+	skip_comment(fp);
+	get_dimensions(fp, params);
 	// New max value corrected with gamma
+	int maxvalue = params->maxvalue;	
 	params->maxvalue = gamma_encode(maxvalue, maxvalue);		
 }
 
-void verify_file_format(char *buffer) {
+void verify_file_format(FILE *fp) {
+	char ch;
 	// Confirms it's pgm format
-	if(buffer[0] != 'P' || buffer[1] != '2'){
-		// Wrong file format
-		fprintf(stderr, "Expected pgm file format\nAborting execution...\n");
+	ch = getc(fp);
+	if (ch == 'P') {
+		ch = getc(fp);
+		if (ch != '2') {
+			fprintf(stderr, "Error: Not valid pgm file type\nAborting execution...\n");
+			exit(1);
+		}
+	} else {
+		fprintf(stderr, "Error: Not valid pgm file type\nAborting execution...\n");
 		exit(1);
+	}
+	// skip to the newline
+	while(getc(fp) != '\n');
+}
+
+void skip_comment(FILE *fp) {
+	// If comment skip till the end of line
+	while (getc(fp) == '#')
+	{
+		while (getc(fp) != '\n');
 	}
 }
 
-bool is_comment(char *buffer) {
-	return (buffer[0] == '#');
-}
-
-void get_dimensions(char *buffer, ImageParameters *params) {
-	char *token;
-	// Get dimensions
-	token = start_tokenize(buffer);
-	params->width = atoi(token);
-	token = continue_tokenize();
-	params->height = atoi(token);
+void get_dimensions(FILE *fp, ImageParameters *params) {
+	fscanf(fp,"%d", &((*params).width));
+	fscanf(fp,"%d", &((*params).height));
+	fscanf(fp,"%d", &((*params).maxvalue));
 }
 
 int* read_content(FILE *fp, ImageParameters *params) {
-	char buffer[100];
 	// Values encoded as a single array
 	// Ordered by row block of width elements
 	// element (i,j) is at position [i*width+j]
 	// with both i and j starting at zero
-	int i, *values;
+	int i, j, value, *values;
 	int height = params->height;
 	int width = params->width;
 	// Allocate  array for all values
 	values = (int*)malloc(width*height*sizeof(int));
 	// Read all the content
 	for (i = 0; i < height; ++i) {
-		if (!fgets(buffer, sizeof(buffer), fp)) {
-			fprintf(stderr, "Height greater than number of content lines\nAborting execution...\n");	
-			exit(1);
+		for (j = 0; i < width; ++j) {
+			fscanf(fp,"%d", &value);
+			set_value(values, width, i, j, value);
 		}
-		read_line(buffer, width, values, i);
 	}
 	return values;
-}
-
-void read_line(char *buffer, int width, int *values, int line_number) {	
-	int i;
-	char *token;
-	// Read and set the whole line
-	for (i=0; i<width; i++) {		
-		if (i == 0) {
-			token = start_tokenize(buffer);
-		} else {
-			token = continue_tokenize();
-		}
-		int value = atoi(token);
-		set_value(values, width, line_number, i, value);
-	}
-}
-
-char* start_tokenize(char *buffer) {
-	// Setup tokenizer reference
-	return (char*)strtok(buffer, SEPARATOR);
-}
-
-char* continue_tokenize() {
-	// Continue using previous reference
-	return (char*)strtok(NULL, SEPARATOR);
 }
 
 void set_value(int *values, int width, int i, int j, int value) {
