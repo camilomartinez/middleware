@@ -3,5 +3,7 @@ http://www.thecloudavenue.com/2012/01/how-to-setup-password-less-ssh-to.html
 ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa
 2) Copy the key to all the slaves (replace username appropriately as the user starting the Hadoop daemons). Will be prompted for the password.
 ssh-copy-id -i $HOME/.ssh/id_rsa.pub username@slave-hostname
+3) Copy the key to localhost on the master
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 3) Remember to update ip-address on both the vagrant file and /etc/hosts
 4) Update the hosts list in the bash script
