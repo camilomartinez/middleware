@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- Published by JAX-WS RI (http://jax-ws.java.net). RI's version is JAX-WS RI 2.2.9-b130926.1035 svn-revision#5f6196f2b90e9460065a4c2f4e30e065b245e51e. --><xs:schema xmlns:tns="http://impl.server/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://impl.server/">
+
+<xs:element name="getMovie" type="tns:getMovie"></xs:element>
+
+<xs:element name="getMovieResponse" type="tns:getMovieResponse"></xs:element>
+
+<xs:element name="getMovies" type="tns:getMovies"></xs:element>
+
+<xs:element name="getMoviesResponse" type="tns:getMoviesResponse"></xs:element>
+
+<xs:complexType name="getMovies">
+<xs:sequence>
+<xs:element name="SearchTerm" type="xs:string" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getMoviesResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:string" minOccurs="0" maxOccurs="unbounded"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getMovie">
+<xs:sequence>
+<xs:element name="MovieName" type="xs:string" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getMovieResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:movie" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="movie">
+<xs:sequence>
+<xs:element name="audienceScore" type="xs:int"></xs:element>
+<xs:element name="booksList" type="tns:book" nillable="true" minOccurs="0" maxOccurs="unbounded"></xs:element>
+<xs:element name="criticsScore" type="xs:int"></xs:element>
+<xs:element name="directorsList" type="xs:string" nillable="true" minOccurs="0" maxOccurs="unbounded"></xs:element>
+<xs:element name="posterUrl" type="xs:string" minOccurs="0"></xs:element>
+<xs:element name="title" type="xs:string" minOccurs="0"></xs:element>
+<xs:element name="year" type="xs:int"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="book">
+<xs:sequence>
+<xs:element name="authorsList" type="xs:string" nillable="true" minOccurs="0" maxOccurs="unbounded"></xs:element>
+<xs:element name="link" type="xs:string" minOccurs="0"></xs:element>
+<xs:element name="pageCount" type="xs:int"></xs:element>
+<xs:element name="publishedDate" type="xs:string" minOccurs="0"></xs:element>
+<xs:element name="publisher" type="xs:string" minOccurs="0"></xs:element>
+<xs:element name="title" type="xs:string" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>
