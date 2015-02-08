@@ -30,3 +30,5 @@ then
 `./bin/hadoop namenode -format`
 
 `./bin/start-all.sh`
+
+verify namenode is working at http://localhost:50070
