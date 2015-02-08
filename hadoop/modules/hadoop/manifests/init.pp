@@ -1,11 +1,11 @@
 class hadoop {
 
 exec { "download_hadoop":
-command => "wget -O /tmp/hadoop.tar.gz http://apache.fastbull.org/hadoop/common/hadoop-1.2.1/hadoop-1.2.1.tar.gz",
+command => "wget -O /tmp/hadoop.tar.gz http://apache.fastbull.org/hadoop/common/hadoop-2.6.0/hadoop-2.6.0.tar.gz",
 path => $path,
 user => $user,
 group => $user,
-unless => "ls ${install_dir} | grep hadoop-1.2.1",
+unless => "ls ${install_dir} | grep hadoop-2.6.0",
 require => Package["openjdk-6-jdk"]
 }
 
@@ -14,18 +14,20 @@ exec { "unpack_hadoop" :
   path => $path,
   user => $user,
   group => $user,
-  creates => "${hadoop_home}-1.2.1",
+  creates => "${hadoop_home}-2.6.0",
+  unless => "ls ${install_dir} | grep hadoop-2.6.0",
   require => Exec["download_hadoop"]
 }
 
 exec { "move_hadoop" :
-  command => "mv /tmp/hadoop-1.2.1 ${install_dir}",
+  command => "mv /tmp/hadoop-2.6.0 ${install_dir}",
   path => $path,
+  unless => "ls ${install_dir} | grep hadoop-2.6.0",
   require => Exec["unpack_hadoop"]
 }
-
+/*
 file {
-  "${hadoop_home}-1.2.1/conf/slaves":
+  "${hadoop_home}-2.6.0/conf/slaves":
   content => template('hadoop/slaves'),
   mode => 644,
   owner => $user,
@@ -34,7 +36,7 @@ file {
  }
  
 file {
-  "${hadoop_home}-1.2.1/conf/masters":
+  "${hadoop_home}-2.6.0/conf/masters":
   content => template('hadoop/masters'),
   mode => 644,
   owner => $user,
@@ -43,7 +45,7 @@ file {
  }
 
 file {
-  "${hadoop_home}-1.2.1/conf/core-site.xml":
+  "${hadoop_home}-2.6.0/conf/core-site.xml":
   content => template('hadoop/core-site.xml'),
   mode => 644,
   owner => $user,
@@ -52,7 +54,7 @@ file {
  }
  
 file {
-  "${hadoop_home}-1.2.1/conf/mapred-site.xml":
+  "${hadoop_home}-2.6.0/conf/mapred-site.xml":
   content => template('hadoop/mapred-site.xml'),
   mode => 644,
   owner => $user,
@@ -61,16 +63,16 @@ file {
  }
  
  file {
-  "${hadoop_home}-1.2.1/conf/hdfs-site.xml":
+  "${hadoop_home}-2.6.0/conf/hdfs-site.xml":
   content => template('hadoop/hdfs-site.xml'),
   mode => 644,
   owner => $user,
   group => $user,
   require => Exec["move_hadoop"]
  }
- 
+ */
   file {
-  "${hadoop_home}-1.2.1/conf/hadoop-env.sh":
+  "${hadoop_home}-2.6.0/etc/hadoop/hadoop-env.sh":
   content => template('hadoop/hadoop-env.sh'),
   mode => 644,
   owner => $user,

@@ -2,14 +2,15 @@ $install_dir = "/opt"
 $hadoop_home = "${install_dir}/hadoop"
 $user = "ubuntu"
 $group = "ubuntu"
-$hadoop_master = '10.10.0.52'
+$hadoop_master = '10.10.0.50'
+/*
 $hadoop_backup = '10.10.0.51'
-$hadoop_1 = '10.10.0.53'
-$hadoop_2 = '10.10.0.54'
-$hadoop_3 = '10.10.0.55'
+$hadoop_1 = '10.10.0.52'
+$hadoop_2 = '10.10.0.53'
+$hadoop_3 = '10.10.0.54'*/
 
 include hadoop
-include mahout
+/*include mahout*/
 
 file { 
 	   "/home/${user}":
@@ -42,7 +43,7 @@ exec { 'apt-get update':
 }
 
 package { "openjdk-6-jdk" :
-   ensure => present,
+  ensure => present,
   require => [ Exec['apt-get update'], File["/home/${user}"] ]
 }
 
@@ -91,6 +92,14 @@ file{
   content => "StrictHostKeyChecking no",
   require => File["/home/${user}/.ssh/id_rsa.pub"]
 }
+host { 'hadoopmaster':
+    ip => "${hadoop_master}",
+}
+
+/*
+host { 'backup':
+    ip => "${hadoop_backup}",
+}
 
 host { 'hadoop1':
     ip => "${hadoop_1}",
@@ -103,11 +112,4 @@ host { 'hadoop2':
 host { 'hadoop3':
     ip => "${hadoop_3}",
 }
-
-host { 'master':
-    ip => "${hadoop_master}",
-}
-
-host { 'backup':
-    ip => "${hadoop_backup}",
-}
+*/

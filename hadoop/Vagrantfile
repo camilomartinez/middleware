@@ -16,31 +16,35 @@ Vagrant.configure("2") do |config|
      puppet.manifest_file  = "base-hadoop.pp"
      puppet.module_path = "modules"
   end
-  
-  config.vm.define :backup do |box|
-    box.vm.network "private_network", ip: "10.10.0.51"
-    box.vm.host_name = "backup"  
-  end
-  
-  config.vm.define :hadoop1 do |hadoop1_config|
-    hadoop1_config.vm.network "private_network", ip: "10.10.0.53"
-    hadoop1_config.vm.host_name = "hadoop1"
-  end
-  
-  config.vm.define :hadoop2 do |hadoop2_config|
-    hadoop2_config.vm.network "private_network", ip: "10.10.0.54"
-    hadoop2_config.vm.host_name = "hadoop2"
-  end
-  
-  config.vm.define :hadoop3 do |hadoop3_config|
-    hadoop3_config.vm.network "private_network", ip: "10.10.0.55"
-    hadoop3_config.vm.host_name = "hadoop3"
-  end
-  
-   config.vm.define :master do |master_config|
-    master_config.vm.network "private_network", ip: "10.10.0.52"
+    
+  config.vm.define :hadoopmaster do |master_config|
+    node_name = "hadoopmaster"
+    master_config.vm.network "private_network", ip: "10.10.0.50"
     master_config.vm.network "forwarded_port", guest: 50070, host: 50070
-    master_config.vm.host_name = "master"
+    master_config.vm.host_name = node_name
+    master_config.vm.provider :virtualbox do |vb|
+      vb.name = node_name
+    end
   end
+
+  # config.vm.define :backup do |box|
+  #   box.vm.network "private_network", ip: "10.10.0.51"
+  #   box.vm.host_name = "backup"  
+  # end
+  
+  # config.vm.define :hadoop1 do |hadoop1_config|
+  #   hadoop1_config.vm.network "private_network", ip: "10.10.0.52"
+  #   hadoop1_config.vm.host_name = "hadoop1"
+  # end
+  
+  # config.vm.define :hadoop2 do |hadoop2_config|
+  #   hadoop2_config.vm.network "private_network", ip: "10.10.0.53"
+  #   hadoop2_config.vm.host_name = "hadoop2"
+  # end
+  
+  # config.vm.define :hadoop3 do |hadoop3_config|
+  #   hadoop3_config.vm.network "private_network", ip: "10.10.0.54"
+  #   hadoop3_config.vm.host_name = "hadoop3"
+  # end
 
 end
