@@ -1,9 +1,13 @@
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
- <configuration>
+<configuration>
   <property>
-   <name>fs.default.name</name>
-   <value>hdfs://<%= @hadoop_master %>:9000</value>
-   <description>The name of the default file system. A URI whose scheme and authority determine the FileSystem implementation.</description>
+  <!--
+    <name>fs.default.name</name>
+    <value>hdfs://<%= @hadoop_master %>:9000</value>
+    <description>The name of the default file system. A URI whose scheme and authority determine the FileSystem implementation.</description>
+  -->
+    <name>fs.defaultFS</name>
+    <value>hdfs://localhost:9000</value>
   </property>
- </configuration>
+</configuration>

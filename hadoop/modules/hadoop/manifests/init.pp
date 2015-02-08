@@ -45,15 +45,6 @@ file {
  }
 
 file {
-  "${hadoop_home}-2.6.0/conf/core-site.xml":
-  content => template('hadoop/core-site.xml'),
-  mode => 644,
-  owner => $user,
-  group => $user,
-  require => Exec["move_hadoop"]
- }
- 
-file {
   "${hadoop_home}-2.6.0/conf/mapred-site.xml":
   content => template('hadoop/mapred-site.xml'),
   mode => 644,
@@ -61,17 +52,27 @@ file {
   group => $user,
   require => Exec["move_hadoop"]
  }
+ */
  
  file {
-  "${hadoop_home}-2.6.0/conf/hdfs-site.xml":
+  "${hadoop_home}-2.6.0/etc/hadoop/core-site.xml":
+  content => template('hadoop/core-site.xml'),
+  mode => 644,
+  owner => $user,
+  group => $user,
+  require => Exec["move_hadoop"]
+ }
+ 
+ file {
+  "${hadoop_home}-2.6.0/etc/hadoop/hdfs-site.xml":
   content => template('hadoop/hdfs-site.xml'),
   mode => 644,
   owner => $user,
   group => $user,
   require => Exec["move_hadoop"]
  }
- */
-  file {
+
+ file {
   "${hadoop_home}-2.6.0/etc/hadoop/hadoop-env.sh":
   content => template('hadoop/hadoop-env.sh'),
   mode => 644,
