@@ -16,22 +16,23 @@ public class WordCount {
 	}
 
 	public static void main(String[] args) throws Exception{
-		//JobClient client  = new JobClient();
 		Configuration conf = new Configuration();
 
-		Job job = new Job(conf, "word count");
-		String[] otherArgs = new GenericOptionsParser(conf,args).getRemainingArgs();
-		job.setCombinerClass(WordCountReducer.class);
-		job.setReducerClass(WordCountReducer.class);
-		job.setMapperClass(WordCountMapper.class);
-		job.setJarByClass(WordCount.class);
+		Job job = Job.getInstance(conf);
+		job.setJobName("word count");
+		job.setJarByClass(WordCount.class);		
+		
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
+		
+		job.setMapperClass(WordCountMapper.class);
+		job.setCombinerClass(WordCountReducer.class);
+		job.setReducerClass(WordCountReducer.class);		
+		
+		String[] otherArgs = new GenericOptionsParser(conf,args).getRemainingArgs();
 		FileInputFormat.addInputPath(job, new Path(otherArgs[0]));
 		FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
-		System.exit(job.waitForCompletion(true) ? 0: 1);
 		
-		
-		
+		System.exit(job.waitForCompletion(true) ? 0: 1);					
 	}
 }

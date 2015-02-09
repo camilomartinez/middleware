@@ -1,7 +1,6 @@
 package polimi.camilo.hadoop.LogAnalysis;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -20,11 +19,8 @@ public class WordCountReducer extends Reducer<Text, IntWritable, Text, IntWritab
 			Context context)
 			throws IOException, InterruptedException {
 		int sum=0;
-		Iterator<IntWritable> itr= intOne.iterator();
-		
-		while (itr.hasNext()){
-			sum  += itr.next().get();
-			
+		for(IntWritable value: intOne) {
+			sum += value.get();
 		}
 		result.set(sum);
 		context.write(word, result);

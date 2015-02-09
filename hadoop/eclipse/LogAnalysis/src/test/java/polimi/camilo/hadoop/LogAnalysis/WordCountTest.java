@@ -27,7 +27,7 @@ public class WordCountTest {
 		mapDriver.setMapper(mapper);
 		reduceDriver = new ReduceDriver<Text,IntWritable,Text,IntWritable>();
 		reduceDriver.setReducer(reducer);
-		mapReduceDriver = new MapReduceDriver();
+		mapReduceDriver = new MapReduceDriver<LongWritable, Text, Text, IntWritable, Text, IntWritable>();
 		mapReduceDriver.setMapper(mapper);
 		mapReduceDriver.setReducer(reducer);
 		
