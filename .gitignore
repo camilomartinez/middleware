@@ -4,3 +4,5 @@ openmpi/hello/hello
 openmpi/mpitutorial-master/
 openmpi/gc/log*
 openmpi/gc/out.pgm
+*.class
+*.java
