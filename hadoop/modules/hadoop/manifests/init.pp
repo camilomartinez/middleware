@@ -43,20 +43,21 @@ file {
   group => $user,
   require => Exec["move_hadoop"]
  }
-*/
 
 file {
-  "${hadoop_home}-2.6.0/etc/hadoop/mapred-site.xml":
-  content => template('hadoop/mapred-site.xml'),
+  "${hadoop_home}-2.6.0/etc/hadoop/yarn-site.xml":
+  content => template('hadoop/yarn-site.xml'),
   mode => 644,
   owner => $user,
   group => $user,
   require => Exec["move_hadoop"]
 }
 
+*/
+
 file {
-  "${hadoop_home}-2.6.0/etc/hadoop/yarn-site.xml":
-  content => template('hadoop/yarn-site.xml'),
+  "${hadoop_home}-2.6.0/etc/hadoop/mapred-site.xml":
+  content => template('hadoop/mapred-site.xml'),
   mode => 644,
   owner => $user,
   group => $user,
