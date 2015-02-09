@@ -4,7 +4,7 @@
 
   <groupId>polimi.camilo.hadoop</groupId>
   <artifactId>LogAnalysis</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>LogAnalysis</name>
@@ -18,8 +18,20 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.10</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+   	  <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <version>2.2.0</version>
+	  <scope>provided</scope>
+    </dependency>
+    <dependency>
+	  <groupId>org.apache.mrunit</groupId>
+	  <artifactId>mrunit</artifactId>
+	  <version>1.0.0</version>
+	  <classifier>hadoop2</classifier>
     </dependency>
   </dependencies>
 </project>

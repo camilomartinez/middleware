@@ -32,3 +32,9 @@ then
 `./sbin/start-dfs.sh`
 
 verify namenode is working at http://localhost:50070
+
+copy desired jar
+
+execute it with
+
+'./bin/hadoop jar customjars/LogAnalysis-1.0.0.jar polimi.camilo.hadoop.LogAnalysis.WordCount input output'
