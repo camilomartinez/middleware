@@ -25,10 +25,10 @@ then
 
 `sudo su ubuntu -`
 
-`cd /opt/hadoop-1.2.1`
+`cd /opt/hadoop-2.6.0`
 
-`./bin/hadoop namenode -format`
+`./bin/hdfs namenode -format`
 
-`./bin/start-all.sh`
+`./sbin/start-dfs.sh`
 
 verify namenode is working at http://localhost:50070
