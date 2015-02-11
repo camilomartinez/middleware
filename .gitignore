@@ -6,3 +6,9 @@ openmpi/gc/log*
 openmpi/gc/out.pgm
 *.class
 hadoop/exercises/
+rest/
+soa/workspace/
+rmi/
+jms/
+soa/es1/
+concurrency/exercises/
