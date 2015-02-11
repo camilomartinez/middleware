@@ -12,3 +12,4 @@ rmi/
 jms/
 soa/es1/
 concurrency/exercises/
+openmpi/hello-omp/hello
