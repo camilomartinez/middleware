@@ -5,3 +5,4 @@ apt-get install -y openmpi-bin openmpi-common openssh-client openssh-server libo
 # Useful dev tools
 apt-get install gdb -y
 apt-get install make -y
+apt-get install g++ -y
