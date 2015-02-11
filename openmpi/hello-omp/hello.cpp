@@ -1,7 +1,11 @@
+#include <omp.h>
 #include <iostream>
 
 using namespace std;
 
 int main() {
-	cout << "Hello World\n";
+	#pragma omp parallel num_threads(3)
+	{
+		cout << "Hello World\n";
+	}
 }
