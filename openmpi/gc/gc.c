@@ -200,6 +200,10 @@ int get_value(int* values, int width, int i, int j) {
 
 void encode_line(int *line, int size, int maxvalue) {
 	int i;
+	// Using openmp to speed up encoding as each iteration is independent
+	// num_threads defined implicitly according to the number of cores (2)
+	// static schedule is enough as workload should be balanced
+	#pragma omp parallel for shared(line, size, maxvalue)
 	for (i=0; i<size; i++) {
 		int value_in = line[i];
 		int value_out = gamma_encode(value_in, maxvalue);
