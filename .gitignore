@@ -14,3 +14,5 @@ soa/es1/
 concurrency/exercises/
 openmpi/hello-omp/hello
 openmpi/gc/test/elev_bump_16k.pgm
+openmpi/count_omp/count
+openmpi/max-omp/max
