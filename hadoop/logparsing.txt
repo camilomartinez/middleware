@@ -1,0 +1,18 @@
+Java
+"^([\\d.]+) (\\S+) (\\S+) \\[([\\w:/]+\\s[+\\-]\\d{4})\\] \"(.+?)\" (\\d{3}) (\\d+) \"([^\"]+)\" \"([^\"]+)\""
+RegexHero
+^([\d.]+) \S+ \S+ \[([\w:/]+\s[+-]\d{4})\] "(.+?)" (\d{3}) (\d+) "([^"]+)" "([^"]+)"$
+Source
+http://www.java2s.com/Code/Java/Development-Class/ParseanApachelogfilewithRegularExpressions.htm
+    
+	System.out.println("IP Address: " + matcher.group(1));
+    System.out.println("Date&Time: " + matcher.group(2));
+    System.out.println("Request: " + matcher.group(3));
+    System.out.println("Response: " + matcher.group(4));
+    System.out.println("Bytes Sent: " + matcher.group(5));
+    if (!matcher.group(6).equals("-"))
+      System.out.println("Referer: " + matcher.group(6));
+    System.out.println("Browser: " + matcher.group(7));
+	
+Useful
+http://hadooped.blogspot.it/2013/07/log-parsing-in-hadoop-part-1-java-using.html
