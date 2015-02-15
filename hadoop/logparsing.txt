@@ -17,3 +17,6 @@ http://www.java2s.com/Code/Java/Development-Class/ParseanApachelogfilewithRegula
 	
 Useful
 http://hadooped.blogspot.it/2013/07/log-parsing-in-hadoop-part-1-java-using.html
+
+Pattern for replacing in PN2
+.+?(\d{2}/\w{3}/\d{4}).*?html\sH.*

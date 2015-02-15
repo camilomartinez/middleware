@@ -1,17 +1,15 @@
 package polimi.camilo.hadoop.LogAnalysis;
 
 import java.io.IOException;
-import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 public class PageviewsMapper extends Mapper<LongWritable, Text, Text, LongWritable> {
-	private final String LogPattern = "^([\\d.]+) \\S+ \\S+ \\[([\\w/]+):([\\w:]+\\s[+\\-]\\d{4})\\] \"(.+?)\" (\\d{3}) (\\d+) \"([^\"]+)\" \"([^\"]+)\"";
+	private final String LogPattern = "^([\\d.]+) \\S+ \\S+ \\[([\\w/]+):([\\w:]+\\s[+\\-]\\d{4})\\] \"(.+?html\\s.+?)\" (\\d{3}) (\\d+) \"([^\"]+)\" \"([^\"]+)\"";
 	private int NUM_FIELDS = 8;
 	
 	private final LongWritable one = new LongWritable(1);
@@ -29,7 +27,12 @@ public class PageviewsMapper extends Mapper<LongWritable, Text, Text, LongWritab
 		Pattern pattern = Pattern.compile(LogPattern);
 	    Matcher matcher = pattern.matcher(logEntry);
 	    // Pattern matching error
-		if (!matcher.matches() || NUM_FIELDS != matcher.groupCount()) {
+	    if (!matcher.matches()) {
+	    	System.err.println("Omitting entry:");
+			System.err.println(logEntry);
+			return;
+		}
+		if (NUM_FIELDS != matcher.groupCount()) {
 			System.err.println("Bad log entry (or problem with RE?):");
 			System.err.println(logEntry);
 			return;
