@@ -10,11 +10,11 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-public class PageviewsMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+public class PageviewsMapper extends Mapper<LongWritable, Text, Text, LongWritable> {
 	private final String LogPattern = "^([\\d.]+) \\S+ \\S+ \\[([\\w/]+):([\\w:]+\\s[+\\-]\\d{4})\\] \"(.+?)\" (\\d{3}) (\\d+) \"([^\"]+)\" \"([^\"]+)\"";
 	private int NUM_FIELDS = 8;
 	
-	private final IntWritable one = new IntWritable(1);
+	private final LongWritable one = new LongWritable(1);
 	private Text dateText = new Text();
 	
 	public PageviewsMapper()  {
