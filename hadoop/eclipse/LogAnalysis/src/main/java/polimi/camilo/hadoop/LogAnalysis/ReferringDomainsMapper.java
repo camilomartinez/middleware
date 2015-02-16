@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 
 import org.apache.hadoop.io.Text;
 
-public class ReferringDomainsMapper  extends BaseRegexMapper<Text> {
+public class ReferringDomainsMapper extends BaseRegexMapper<Text> {
 	private final String logPattern = "^([\\d.]+) \\S+ \\S+ \\[([\\w/]+):([\\w:]+\\s[+\\-]\\d{4})\\] \"(.+?html\\s.+?)\" (\\d{3}) (\\d+) \"(http[s]?://(?:www\\.)?(.+?)/[^\"]*)\" \"([^\"]+)\"";
 	private int dateGroupNumber = 2;
 	private int referrerGroupNumber = 7;
@@ -25,7 +25,15 @@ public class ReferringDomainsMapper  extends BaseRegexMapper<Text> {
 
 	@Override
 	protected Text MapperOutputKey(Matcher matcher) {
-		return OutputGroup(matcher, dateGroupNumber);
+		String dateString = matcher.group(dateGroupNumber);
+		String[] dateSplit = dateString.split("/");
+		int day = Integer.parseInt(dateSplit[0]);
+		String month = dateSplit[1];
+		// Simple way to check if date is between 22 of April and 30 May
+		if ((month.equals("Apr") && day >= 22) || (month.equals("May") && day <= 30)) {
+			return OutputGroup(matcher, dateGroupNumber);
+		}
+		return null;
 	}
 
 	@Override
