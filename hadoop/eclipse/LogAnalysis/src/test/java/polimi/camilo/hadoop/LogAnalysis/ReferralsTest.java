@@ -1,15 +1,13 @@
 package polimi.camilo.hadoop.LogAnalysis;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.lib.reduce.LongSumReducer;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 import org.apache.hadoop.mrunit.mapreduce.MapReduceDriver;
-import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,13 +24,18 @@ public class ReferralsTest {
 	private final String TestEntry9 = "62.98.76.35 - - [10/Jun/2003:01:07:24 -0700] \"GET /archive/2003/03/26/hiding_s.shtml HTTP/1.1\" 200 17019 \"http://65.54.244.250/cgi-bin/linkrd?_lang=IT&lah=d3458b4f8013fab336193e0e641848a2&lat=1049960696&hm___action=http%3a%2f%2fwww%2ewaxy%2eorg%2farchive%2f2003%2f03%2f26%2fhiding_s%2eshtml%23001203\" \"Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 4.0)\"";
 	
 	MapDriver<LongWritable, Text, Text, LongWritable> mapDriver;
+	MapReduceDriver<LongWritable, Text, Text, LongWritable, Text, LongWritable> mapReduceDriver;	
 	
 	@Before
 	public void setup(){
 		ReferralsMapper mapper =  new ReferralsMapper();
+		LongSumReducer<Text> reducer = new LongSumReducer<Text>();
 		
 		mapDriver = new MapDriver<LongWritable, Text, Text, LongWritable>();
 		mapDriver.setMapper(mapper);
+		mapReduceDriver = new MapReduceDriver<LongWritable, Text, Text, LongWritable, Text, LongWritable>();
+		mapReduceDriver.setMapper(mapper);
+		mapReduceDriver.setReducer(reducer);
 	}
 	
 	@Test
@@ -50,5 +53,23 @@ public class ReferralsTest {
 	    mapDriver.withOutput(new Text("cfox.com"), new LongWritable(1));
 	    mapDriver.withOutput(new Text("65.54.244.250"), new LongWritable(1));	    
 	    mapDriver.runTest();
+	}
+	
+	@Test
+	public void testMapReduce() throws IOException{
+		mapReduceDriver.withInput(new LongWritable(1), new Text(TestEntry1));
+		mapReduceDriver.withInput(new LongWritable(2), new Text(TestEntry2));
+		mapReduceDriver.withInput(new LongWritable(3), new Text(TestEntry2));
+		mapReduceDriver.withInput(new LongWritable(4), new Text(TestEntry3));
+		mapReduceDriver.withInput(new LongWritable(5), new Text(TestEntry4));
+		mapReduceDriver.withInput(new LongWritable(6), new Text(TestEntry5));
+		mapReduceDriver.withInput(new LongWritable(7), new Text(TestEntry6));
+		mapReduceDriver.withInput(new LongWritable(8), new Text(TestEntry7));
+		mapReduceDriver.withInput(new LongWritable(9), new Text(TestEntry8));
+		mapReduceDriver.withInput(new LongWritable(10), new Text(TestEntry9));
+		mapReduceDriver.withOutput(new Text("65.54.244.250"), new LongWritable(1));	    
+	    mapReduceDriver.withOutput(new Text("cfox.com"), new LongWritable(1));
+	    mapReduceDriver.withOutput(new Text("google.com"), new LongWritable(2));
+		mapReduceDriver.runTest();
 	}
 }
