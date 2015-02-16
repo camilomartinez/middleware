@@ -22,13 +22,13 @@ public abstract class BaseRegexMapper<T> extends Mapper<LongWritable, Text, Text
 	    Matcher matcher = pattern.matcher(logEntry);
 	    // Pattern doesn't match
 	    if (!matcher.matches()) {
-	    	System.err.println("Omitting entry:");
-			System.err.println(logEntry);
+	    	//System.out.println("Omitting entry:");
+			//System.out.println(logEntry);
 			return;
 		}
 		if (NumberOfFields() != matcher.groupCount()) {
-			System.err.println("Bad log entry (or problem with RE?):");
-			System.err.println(logEntry);
+			//System.out.println("Bad log entry (or problem with RE?):");
+			//System.out.println(logEntry);
 			return;
 		}
 	    Text outputKey = MapperOutputKey(matcher);
