@@ -1,10 +1,15 @@
 package polimi.camilo.hadoop.LogAnalysis;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
+import org.apache.hadoop.mrunit.mapreduce.MapReduceDriver;
+import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,13 +22,21 @@ public class ReferringDomainsTest {
 	private final String TestEntry5 = "62.98.76.35 - - [10/Apr/2003:01:07:24 -0700] \"GET /archive/2003/03/26/hiding_s.shtml HTTP/1.1\" 200 17019 \"http://65.54.244.250/cgi-bin/linkrd?_lang=IT&lah=d3458b4f8013fab336193e0e641848a2&lat=1049960696&hm___action=http%3a%2f%2fwww%2ewaxy%2eorg%2farchive%2f2003%2f03%2f26%2fhiding_s%2eshtml%23001203\" \"Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 4.0)\"";
 	
 	MapDriver<LongWritable, Text, Text, Text> mapDriver;
+	ReduceDriver<Text,Text,Text,IntWritable> reduceDriver;
+	MapReduceDriver<LongWritable, Text, Text, Text, Text, IntWritable> mapReduceDriver;	
 	
 	@Before
 	public void setup(){
 		ReferringDomainsMapper mapper =  new ReferringDomainsMapper();
+		ReferringDomainsReducer reducer =  new ReferringDomainsReducer();
 		
 		mapDriver = new MapDriver<LongWritable, Text, Text, Text>();
 		mapDriver.setMapper(mapper);
+		reduceDriver = new ReduceDriver<Text,Text,Text,IntWritable>();
+		reduceDriver.setReducer(reducer);
+		mapReduceDriver = new MapReduceDriver<LongWritable, Text, Text, Text, Text, IntWritable>();
+		mapReduceDriver.setMapper(mapper);
+		mapReduceDriver.setReducer(reducer);
 	}
 	
 	@Test
@@ -37,5 +50,31 @@ public class ReferringDomainsTest {
 	    mapDriver.withOutput(new Text("29/Apr/2003"), new Text("cfox.com"));	    
 	    mapDriver.withOutput(new Text("10/Apr/2003"), new Text("65.54.244.250"));
 	    mapDriver.runTest();
+	}
+	
+	@Test
+	public void testReducer() throws IOException{		
+		List<Text> values = new ArrayList<Text>();
+		values.add(new Text("google.com"));
+		values.add(new Text("google.com"));
+		values.add(new Text("cfox.com"));
+		values.add(new Text("65.54.244.250"));
+		
+		reduceDriver.withInput(new Text("29/Apr/2003"),values);
+		reduceDriver.withOutput(new Text("29/Apr/2003"), new IntWritable(3));
+		reduceDriver.runTest();
+	}
+	
+	@Test
+	public void testMapReduce() throws IOException{
+		mapReduceDriver.withInput(new LongWritable(1), new Text(TestEntry1));
+		mapReduceDriver.withInput(new LongWritable(2), new Text(TestEntry2));
+		mapReduceDriver.withInput(new LongWritable(3), new Text(TestEntry2));
+		mapReduceDriver.withInput(new LongWritable(4), new Text(TestEntry3));
+		mapReduceDriver.withInput(new LongWritable(5), new Text(TestEntry4));
+		mapReduceDriver.withInput(new LongWritable(6), new Text(TestEntry5));		
+		mapReduceDriver.addOutput(new Text("10/Apr/2003"), new IntWritable(1));
+		mapReduceDriver.addOutput(new Text("29/Apr/2003"), new IntWritable(2));
+		mapReduceDriver.runTest();
 	}
 }

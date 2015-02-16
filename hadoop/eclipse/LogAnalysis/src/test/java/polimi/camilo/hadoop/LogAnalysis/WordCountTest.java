@@ -43,8 +43,7 @@ public class WordCountTest {
 	}
 	
 	@Test
-	public void testReducer() throws IOException{
-		
+	public void testReducer() throws IOException{		
 		List<IntWritable> values = new ArrayList<IntWritable>();
 		values.add(new IntWritable(1));
 		values.add(new IntWritable(1));
@@ -52,6 +51,7 @@ public class WordCountTest {
 		reduceDriver.withOutput(new Text("cat"), new IntWritable(2));
 		reduceDriver.runTest();
 	}
+	
 	@Test
 	public void testMapReduce() throws IOException{
 		mapReduceDriver.withInput(new LongWritable(1), new Text("cat cat mouse"));

@@ -13,10 +13,6 @@ public class ReferringDomainsMapper  extends BaseRegexMapper<Text> {
 	private int numFields = 9;
 	private final Text outputValue = new Text();
 	
-	public ReferringDomainsMapper()  {
-		System.out.println("Init Video Downloads Mapper");
-		}
-
 	@Override
 	protected String LogPattern() {
 		return logPattern;

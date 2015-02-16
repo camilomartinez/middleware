@@ -10,10 +10,6 @@ public class VideoDownloadsMapper extends BaseRegexMapper<LongWritable> {
 	private int dateGroupNumber = 2; 
 	private int numFields = 8;
 	
-	public VideoDownloadsMapper()  {
-		System.out.println("Init Video Downloads Mapper");
-		}
-
 	@Override
 	protected String LogPattern() {
 		return logPattern;

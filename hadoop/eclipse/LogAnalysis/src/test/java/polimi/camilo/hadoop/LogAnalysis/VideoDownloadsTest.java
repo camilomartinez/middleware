@@ -20,7 +20,6 @@ public class VideoDownloadsTest {
 	private final String OriginalVideoOtherLog = "68.65.217.50 - - [30/Apr/2003:00:19:59 -0700] \"GET /random/video/Star_Wars_Kid.wmv HTTP/1.0\" 200 100388 \"-\" \"NSPlayer/8.0.0.4487\"";
 	
 	MapDriver<LongWritable, Text, Text, LongWritable> mapDriver;
-	ReduceDriver<Text,LongWritable,Text,LongWritable> reduceDriver;
 	MapReduceDriver<LongWritable, Text, Text, LongWritable, Text, LongWritable> mapReduceDriver;
 	
 	@Before
@@ -30,8 +29,6 @@ public class VideoDownloadsTest {
 		
 		mapDriver = new MapDriver<LongWritable, Text, Text, LongWritable>();
 		mapDriver.setMapper(mapper);
-		reduceDriver = new ReduceDriver<Text,LongWritable,Text,LongWritable>();
-		reduceDriver.setReducer(reducer);
 		mapReduceDriver = new MapReduceDriver<LongWritable, Text, Text, LongWritable, Text, LongWritable>();
 		mapReduceDriver.setMapper(mapper);
 		mapReduceDriver.setReducer(reducer);

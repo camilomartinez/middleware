@@ -12,10 +12,6 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 public class VideoDownloads {
 
-	public VideoDownloads() {
-		System.out.println("Init VideoDownloads");
-	}
-
 	public static void main(String[] args) throws Exception{
 		Configuration conf = new Configuration();
 

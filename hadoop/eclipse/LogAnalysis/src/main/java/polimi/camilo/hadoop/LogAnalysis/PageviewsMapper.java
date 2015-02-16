@@ -10,10 +10,6 @@ public class PageviewsMapper extends BaseRegexMapper<LongWritable> {
 	private int dateGroupNumber = 2; 
 	private int numFields = 8;
 	
-	public PageviewsMapper()  {
-		System.out.println("Init Pageviews Mapper");
-		}
-
 	@Override
 	protected String LogPattern() {
 		return logPattern;

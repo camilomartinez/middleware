@@ -18,7 +18,6 @@ public class PageviewsTest {
 	private final String TestEntry3 = "205.156.184.254 - - [19/Feb/2003:07:55:00 -0800] \"GET /random/text/1995_warez_bbs_list.html HTTP/1.1\" 200 529730 \"http://www.google.com/search?q=fist+punch+clipart&hl=en&lr=&ie=UTF-8&start=20&sa=N\" \"Mozilla/4.0 (compatible; MSIE 5.01; Windows 98; Marsh USA Inc. July 2000 build)\"";
 	
 	MapDriver<LongWritable, Text, Text, LongWritable> mapDriver;
-	ReduceDriver<Text,LongWritable,Text,LongWritable> reduceDriver;
 	MapReduceDriver<LongWritable, Text, Text, LongWritable, Text, LongWritable> mapReduceDriver;
 	
 	@Before
@@ -28,8 +27,6 @@ public class PageviewsTest {
 		
 		mapDriver = new MapDriver<LongWritable, Text, Text, LongWritable>();
 		mapDriver.setMapper(mapper);
-		reduceDriver = new ReduceDriver<Text,LongWritable,Text,LongWritable>();
-		reduceDriver.setReducer(reducer);
 		mapReduceDriver = new MapReduceDriver<LongWritable, Text, Text, LongWritable, Text, LongWritable>();
 		mapReduceDriver.setMapper(mapper);
 		mapReduceDriver.setReducer(reducer);
