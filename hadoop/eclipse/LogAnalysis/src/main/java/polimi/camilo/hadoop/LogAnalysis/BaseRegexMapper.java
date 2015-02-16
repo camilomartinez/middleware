@@ -33,7 +33,9 @@ public abstract class BaseRegexMapper<T> extends Mapper<LongWritable, Text, Text
 		}
 	    Text outputKey = MapperOutputKey(matcher);
 	    T outputValue = MapperOutputValue(matcher);
-	    context.write(outputKey, outputValue);
+	    if (outputValue != null) {
+	    	context.write(outputKey, outputValue);
+	    }
 	}
 	
 	protected abstract String LogPattern();

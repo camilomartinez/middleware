@@ -7,7 +7,7 @@ import org.apache.hadoop.io.Text;
 
 public class PageviewsMapper extends BaseRegexMapper<LongWritable> {
 	private final String logPattern = "^([\\d.]+) \\S+ \\S+ \\[([\\w/]+):([\\w:]+\\s[+\\-]\\d{4})\\] \"(.+?html\\s.+?)\" (\\d{3}) (\\d+) \"([^\"]+)\" \"([^\"]+)\"";
-	private int outputKeyGroupNumber = 2; 
+	private int dateGroupNumber = 2; 
 	private int numFields = 8;
 	
 	public PageviewsMapper()  {
@@ -26,7 +26,7 @@ public class PageviewsMapper extends BaseRegexMapper<LongWritable> {
 
 	@Override
 	protected Text MapperOutputKey(Matcher matcher) {
-		return OutputGroup(matcher, outputKeyGroupNumber);
+		return OutputGroup(matcher, dateGroupNumber);
 	}
 
 	@Override

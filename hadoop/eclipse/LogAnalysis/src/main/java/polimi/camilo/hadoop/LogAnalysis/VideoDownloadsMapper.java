@@ -7,7 +7,7 @@ import org.apache.hadoop.io.Text;
 
 public class VideoDownloadsMapper extends BaseRegexMapper<LongWritable> {
 	private final String logPattern = "^([\\d.]+) \\S+ \\S+ \\[([\\w/]+):([\\w:]+\\s[+\\-]\\d{4})\\] \"(.+?Star_Wars_Kid(?:_Remix)?\\.wmv\\s.+?)\" (\\d{3}) (\\d+) \"([^\"]+)\" \"([^\"]+)\"";
-	private int outputKeyGroupNumber = 2; 
+	private int dateGroupNumber = 2; 
 	private int numFields = 8;
 	
 	public VideoDownloadsMapper()  {
@@ -26,7 +26,7 @@ public class VideoDownloadsMapper extends BaseRegexMapper<LongWritable> {
 
 	@Override
 	protected Text MapperOutputKey(Matcher matcher) {
-		return OutputGroup(matcher, outputKeyGroupNumber);
+		return OutputGroup(matcher, dateGroupNumber);
 	}
 
 	@Override
