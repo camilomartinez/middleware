@@ -5,13 +5,13 @@ import java.util.regex.Matcher;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 
-public class PageviewsMapper extends BaseRegexMapper<LongWritable> {
-	private final String logPattern = "^([\\d.]+) \\S+ \\S+ \\[([\\w/]+):([\\w:]+\\s[+\\-]\\d{4})\\] \"(.+?html\\s.+?)\" (\\d{3}) (\\d+) \"([^\"]+)\" \"([^\"]+)\"";
+public class VideoDownloadsMapper extends BaseRegexMapper<LongWritable> {
+	private final String logPattern = "^([\\d.]+) \\S+ \\S+ \\[([\\w/]+):([\\w:]+\\s[+\\-]\\d{4})\\] \"(.+?Star_Wars_Kid(?:_Remix)?\\.wmv\\s.+?)\" (\\d{3}) (\\d+) \"([^\"]+)\" \"([^\"]+)\"";
 	private int outputKeyGroupNumber = 2; 
 	private int numFields = 8;
 	
-	public PageviewsMapper()  {
-		System.out.println("Init Pageviews Mapper");
+	public VideoDownloadsMapper()  {
+		System.out.println("Init Video Downloads Mapper");
 		}
 
 	@Override
