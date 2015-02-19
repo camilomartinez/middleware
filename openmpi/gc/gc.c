@@ -9,6 +9,9 @@ struct ImageParameters {
 	int height;
 	int maxvalue;
 };
+// Avoid printing long lines
+int IS_DEBUG = 0;	
+
 
 int main(int argc, char *argv[]) {
 	char* output_filename;
@@ -259,6 +262,8 @@ void fprint_line(FILE *fp, int *values, int width, int line_number) {
 void print_process_line_debug(char* name, int rank, char *event, int *line, int size) {
 	int i;
 	printf("Processor %s, rank %d %s:\n", name, rank, event);
+	if (!IS_DEBUG)
+		return;
 	for (i=0; i<size; i++) {
 		int value = line[i];
 		if (i != (size - 1)) {
