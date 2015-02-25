@@ -67,8 +67,10 @@ public class MovieClient extends HttpServlet {
 			} catch (Exception e) {
 			} 
 			if (mov == null) {
-				out.write("Server error, reload the webpage");
+				out.write("Server error, go back and try again.");
 			} else {
+				//<img src="mov.getPosterUrl()" height="42" width="42">
+				out.write("<img src=\""+mov.getPosterUrl()+"\" height=\"81\" width=\"54\" />");
 				out.write("</br></br>");
 				out.write("Movie info -> " + mov.getTitle() + " ("
 						+ mov.getYear() + ")");

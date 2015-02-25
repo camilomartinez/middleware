@@ -17,7 +17,10 @@ import org.json.JSONObject;
 import server.Movie;
 
 import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClientConfig;
+import com.ning.http.client.AsyncHttpClientConfig.Builder;
 import com.ning.http.client.Response;
+//https://github.com/AsyncHttpClient/async-http-client
 
 public class RottenTomatoesClient {
     private final String API_KEY = "jpn4dayjxng962r47j4dt4fe";
@@ -25,7 +28,9 @@ public class RottenTomatoesClient {
     private AsyncHttpClient client;
 
     public RottenTomatoesClient() {
-        this.client = new AsyncHttpClient();
+    	Builder builder = new AsyncHttpClientConfig.Builder();
+    	builder.setRequestTimeoutInMs(30000);
+        this.client = new AsyncHttpClient(builder.build());
     }
     private String addToUrl(String url, String addedText){
     	return url + addedText;
@@ -76,13 +81,7 @@ public class RottenTomatoesClient {
 	        //Parse json array into array of model objects
 	        ArrayList<String> titlesList = RottenTomatoesClient.getTitlesFromJson(items);
 	        return titlesList;
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -104,6 +103,7 @@ public class RottenTomatoesClient {
 	        Response r = f.get();
 	        String responseString = processInputStream(r.getResponseBodyAsStream());
 	        JSONObject body = new JSONObject(responseString);
+	        asyncHttpClient.close();
 	        //Get the movies json array
 	        JSONArray items = body.getJSONArray("movies");
 	        //parse id here from json response
@@ -135,13 +135,7 @@ public class RottenTomatoesClient {
 		        movieList.add(mov);//movieList saved for debugging purposes
 			}//otherwise, if movie doesn't exist with precise "title" return first movie in the list
 			return movieList.get(0);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -235,7 +229,9 @@ public class RottenTomatoesClient {
 	        String inputStr;
 	        while ((inputStr = streamReader.readLine()) != null)
 	            responseStrBuilder.append(inputStr);
-	        return responseStrBuilder.toString();
+	        String outputStr = responseStrBuilder.toString();
+	        outputStr.replaceAll("\\\\n", "");
+	        return outputStr;
 	        
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();

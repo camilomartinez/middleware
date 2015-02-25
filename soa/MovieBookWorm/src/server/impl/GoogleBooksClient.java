@@ -20,6 +20,7 @@ import server.Book;
 
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
+//https://github.com/AsyncHttpClient/async-http-client
 
 public class GoogleBooksClient {
 	private final String API_KEY = "AIzaSyC9Mkq50x41mr4YZhVwReaxKU3GBSLUW1c";
@@ -78,6 +79,7 @@ public class GoogleBooksClient {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			return new ArrayList<>();
 		}
 		// Parse itemsJsonArray into array of model objects
 		// ArrayList<String> titlesList =
